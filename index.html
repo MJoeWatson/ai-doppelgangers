@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        ::placeholder {
+            color: rgb(24, 24, 27);
+            opacity: 1; /* Firefox */
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .card-container,
+        .lives-container
+         {
+            position: relative;
+            cursor: default;
+            z-index: 9999;
+            
+        }
+
+        .card-container {
+            padding: 10px;
+        }
+
+        datalist {
+            position: absolute;
+            max-height: 20em;
+            border: 0 none;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        datalist option {
+            font-size: 0.8em;
+            padding: 0.3em 1em;
+            background-color: #ccc;
+            cursor: pointer;
+        }
+
+        datalist option:hover,
+        datalist option:focus {
+            background-color: #036;
+            outline: 0 none;
+        }
+
+        input {
+            /* font-family: 'Courier New', Courier, monospace; */
+            /* background-color: rgb(239, 236, 230); */
+            /* color: rgb(24, 24, 27); */
+        }
+
+        textarea:focus,
+        input:focus {
+            outline: none;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* This was causing the issue, try changing it to a fixed value like 80vh */
+            margin: 0;
+            background-color: rgb(24, 24, 27);
+            /* color: rgb(24, 24, 27); */
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .card {
+            width: 300px;
+            height: 400px;
+            perspective: 1000px;
+            border-color: rgb(239, 236, 230);
+            
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 1s;
+        }
+
+        .flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 5px solid rgb(24, 24, 27);
+            margin-left: -5px;
+            background-color: #fff;
+            border-radius: 10px;
+        }
+
+        .front {
+            transform: rotateY(0deg);
+            background-size: cover;
+        }
+
+        .back {
+            transform: rotateY(180deg);
+            background-size: cover;
+        }
+
+        .input-container {
+            display: flex;
+            width: 300px;
+            margin-top: 40px;
+        }
+
+        .name-input {
+            flex: 1;
+            padding: 8px;
+            border-radius: 0px;
+            font-size: 16px;
+            box-sizing: border-box;
+            border: none;
+            border-bottom: 2px solid rgb(24, 24, 27);
+            background-color: rgb(239, 236, 230);
+        }
+
+        .incorrect {
+            border-bottom: 2px solid rgb(183, 26, 26);
+        }
+
+        .correct {
+            animation: borderAnimation 2s;
+        }
+
+        @keyframes borderAnimation {
+            from {
+                border-color: green;
+            }
+
+            to {
+                border-color: #333;
+            }
+        }
+
+        .arrow {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border: 2px solid #56768c;
+            background-color: #f0f5f9;
+            border-radius: 5px;
+            margin-left: 5px;
+            line-height: 15px;
+        }
+
+        .lives-container {
+            margin-top: 10px;
+            font-size: 30px;
+            margin-bottom: 40px;
+            text-align: right;
+            width: 450px;
+            color: rgb(24, 24, 27);
+            animation: breath 5s ease-in-out;
+
+        }
+        .art {
+            width: 500px;
+            height: 650px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 30px;
+            background-color: rgb(239, 236, 230);
+            border-radius: 8px;
+        }
+
+        @keyframes breath {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+        }
+
+        .art::after {
+            color: rgb(239, 236, 230);
+            content: attr(data-bg-text);
+            display: block;
+            font-size: 50px;
+            line-height: 1;
+            position: absolute;
+            bottom: 2vw;
+            right: 2vw;
+            z-index: -1;
+            animation: breath 5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-10px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(10px);
+            }
+        }
+
+        @keyframes bump {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .reduceLives {
+            color: rgb(183, 26, 26);
+        }
+
+        .addHeart {
+            color: rgb(38, 159, 105);
+            animation: bump 0.2s ease-in-out;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="art" data-bg-text="ai doppelganger.">
+        <div class="lives-container" id="livesContainer" aria-label="Lives: 3"></div>
+    
+        <div class="card-container" id="cardContainer">
+            <div class="card" id="card">
+                <div class="card-inner">
+                    <div class="card-face front" id="frontCard">
+                    </div>
+                    <div class="card-face back" id="backCard">
+                    </div>
+                </div>
+            </div>
+            <div class="input-container">
+                <input list="nameList" type="text" class="name-input" placeholder="Enter your name" id="nameInput" oninput="updateDatalist()" onkeydown="handleKeyPress(event)">
+                <datalist id="nameList">
+                    <!-- Populated dynamically using JavaScript -->
+                </datalist>
+                <!-- <div class="arrow" onclick="checkName()">→</div> -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var lives = 3;
+        var people = [
+            { name: "Léa Seydoux", image: "images/Léa_Seydoux.png" },
+            { name: "Benedict Cumberbatch", image: "images/bc.png" },
+            { name: "Christopher Walken", image: "images/christopher_walken.png" },
+            { name: "Jennifer Connelly", image: "images/jennifer_connelly.png" },
+            { name: "Nicole Kidman", image: "images/nicole-kidman" },
+            { name: "Seth Rogan", image: "images/seth_rogan.png" },
+            { name: "Tom Cruise", image: "images/tom_cruise.png" },
+        ];
+        var randomIndex = Math.floor(Math.random() * people.length);
+        var currentIndex = 0;
+
+        function updateLives() {
+            document.getElementById("livesContainer").innerHTML = "&#x2665; " + lives;
+        }
+
+        function updateDatalist() {
+            var inputElement = document.getElementById("nameInput");
+            var nameList = document.getElementById("nameList");
+
+            nameList.innerHTML = "";
+
+            people.forEach(function (person) {
+                var option = document.createElement("option");
+                option.value = person.name;
+                nameList.appendChild(option);
+            });
+
+            inputElement.setAttribute("list", "nameList");
+        }
+
+        function preloadImage(url) {
+            var img = new Image();
+            img.src = url;
+        }
+
+        function randNum(arr, excludeNum) {
+            var randNumber = Math.floor(Math.random() * arr.length);
+            if (randNumber == excludeNum) {
+                return randNum(arr, excludeNum);
+            } else {
+                return randNumber;
+            }
+        }
+
+        function isNameInArray(inputName) {
+            // Convert the inputName to lowercase for case-insensitive comparison
+            var lowerCaseInputName = inputName.toLowerCase();
+
+            // Iterate through the people array
+            for (var i = 0; i < people.length; i++) {
+                // Convert the current name in the array to lowercase
+                var lowerCasePersonName = people[i].name.toLowerCase();
+
+                // Check if the lowercase inputName matches the lowercase person's name
+                if (lowerCaseInputName === lowerCasePersonName) {
+                    return true; // Match found
+                }
+            }
+
+            return false; // No match found
+        }
+
+
+        function checkName() {
+            var inputName = document.getElementById("nameInput").value.toLowerCase();
+            var card = document.getElementById("card");
+            var inputElement = document.getElementById("nameInput");
+            var frontCard = document.getElementById("frontCard");
+            var backCard = document.getElementById("backCard");
+            var livesContainer = document.getElementById("livesContainer")
+
+            if (inputName === people[currentIndex].name.toLowerCase()) {
+                lives++;
+
+                livesContainer.classList.add("addHeart");
+
+                if (card.classList.contains("flipped")) {
+                    card.classList.remove("flipped");
+                } else {
+                    card.classList.add("flipped");
+                }
+
+                inputElement.classList.remove("incorrect");
+                inputElement.classList.add("correct");
+
+
+                setTimeout(() => {
+                    inputElement.classList.remove("correct");
+                    // Load the next person
+                    currentIndex++;
+
+                    // Set the background images
+                    frontCard.style.backgroundImage = "url('" + people[currentIndex].image + "')";
+                    backCard.style.backgroundImage = "url('" + people[currentIndex].image + "')";
+
+                    // Ensure the images are preloaded for the next person
+                    preloadImage(people[currentIndex].image);
+                    livesContainer.classList.remove("addHeart");
+                }, 300);
+            } else {
+                var isMatch = isNameInArray(inputName);
+                if (! isMatch) {
+                    return
+                } 
+
+                inputElement.classList.remove("correct");
+                inputElement.classList.add("incorrect");
+                livesContainer.classList.add("reduceLives", "shake");
+
+                lives--;
+
+                if (lives === 0) {
+                    alert("Game Over!");
+                }
+
+                card.style.borderColor = "red";
+
+                // Add shake class to the card
+                card.classList.add("shake");
+
+                // Remove the shake class after the animation completes
+                setTimeout(() => {
+                    card.classList.remove("shake");
+                    inputElement.classList.remove("incorrect");
+                    console.log(lives.classList)
+                    livesContainer.classList.remove("reduceLives", "shake");
+                }, 500); // Adjust the duration (in milliseconds) as needed
+            }
+
+            inputElement.value = '';
+            updateLives();
+            inputElement.focus();
+        }
+
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                checkName();
+            }
+        }
+
+        updateLives();
+        updateDatalist();
+
+        // Set the background image for the initial person
+        var frontCard = document.getElementById("frontCard");
+        var backCard = document.getElementById("backCard");
+        frontCard.style.backgroundImage = "url('" + people[currentIndex].image + "')";
+        backCard.style.backgroundImage = "url('" + people[currentIndex].image + "')";
+
+        // Ensure the image is preloaded for the initial person
+        preloadImage(people[currentIndex].image);
+    </script>
+</body>
+
+</html>
